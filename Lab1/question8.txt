@@ -1,0 +1,7 @@
+To see how the programm behaves with different number of elements and threads I run a set of tests.
+For this purpose vectors with 10,20,50,100,1000 elements where aggregated in different executions by 1,2,5 and 10 threads.
+Results can be checked in question_8.png.
+
+As expected the greater the number of vectors' elements, the longer the execution time.
+However, sometimes, with the same number of elements, an execution with a smaller number of threads obtains better results, 
+specially if the number of elements is also small (10,20,50,100).

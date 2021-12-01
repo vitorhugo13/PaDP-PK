@@ -1,0 +1,5 @@
+When compiling and running the programm with disabled mutexes the 
+final result of the global variable is almost always different.
+
+After enabling mutexes, since the threads can't access simultaneously the 
+same resource, the final value will always be 0.
