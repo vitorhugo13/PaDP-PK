@@ -112,8 +112,6 @@ int main(int argc, char *argv[]){
         printf("The number of subintervals of integration: %d\n", n_subintervals);
         h = ((b-a)/(float) n_subintervals);
         sum = (f(a) + f(b)) / (float) 2;
-        printf("sum0:%f\n", sum);
-
         launch_threads();
     }
 
