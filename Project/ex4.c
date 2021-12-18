@@ -5,7 +5,6 @@
 #include <unistd.h>  
 
 #define P 5 //number of processes, which can be varied
-int thread_executions;
 int total_elems;
 float sum;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; //allowing one thread in and blocking access to all others
@@ -52,7 +51,6 @@ void my_pthread_function(void* arg){
 
 void launch_threads(n_elems){
     pthread_t t_array[P]; //initialize array to store threads/processes
-    thread_executions = floor(n_elems/P); //number of executions each process, apart from the last one, will execute. The last thread is responsible for execution the "leftovers" when P doesn't divide N
 
     for(int i = 0; i < P; i++ ){
         int thr = pthread_create(&t_array[i], NULL, my_pthread_function, i );
