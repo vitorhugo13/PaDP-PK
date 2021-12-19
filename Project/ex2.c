@@ -29,26 +29,6 @@ void my_pthread_function(void* arg){
             aux_sum = aux_sum + f(xi(((int) arg + 1)));
         }
     }
-    else if((float) n_subintervals / THREADS == 0){ //if n_subintervals is divisible by THREADS
-        if((int) arg != 0 && (int) arg != n_subintervals - 1){
-            printf("Thread %d executes sum from %d to %d\n", (int) arg + 1, ((n_subintervals/THREADS) * (int) arg) + 1, (n_subintervals/THREADS) * ((int) arg + 1));
-            for(int i = ((n_subintervals/THREADS) * (int) arg) + 1; i <= (n_subintervals/THREADS) * ((int) arg + 1); i++){
-                aux_sum = aux_sum + f(xi(i));
-            }
-        }
-        else if((int) arg == 0){
-            printf("Thread %d executes sum from %d to %d\n", (int) arg + 1, ((n_subintervals/THREADS) * (int) arg) + 2, (n_subintervals/THREADS) * ((int) arg + 1));
-            for(int i = ((n_subintervals/THREADS) * (int) arg) + 2; i <= (n_subintervals/THREADS) * ((int) arg + 1); i++){
-                aux_sum = aux_sum + f(xi(i));
-            }
-        }
-        else if((int) arg == n_subintervals - 1){
-            printf("Thread %d executes sum from %d to %d\n", (int) arg + 1, ((n_subintervals/THREADS) * (int) arg) + 1, (n_subintervals/THREADS) * ((int) arg ));
-            for(int i = ((n_subintervals/THREADS) * (int) arg) + 1; i <= (n_subintervals/THREADS) * ((int) arg ); i++){
-                aux_sum = aux_sum + f(xi(i));
-            }
-        }
-    }
     else{ //otherwise
         if((int) arg == THREADS - 1){
             printf("Thread %d executes sum from %d to %d\n", (int) arg + 1, ((n_subintervals/THREADS) * (int) arg) + 1, n_subintervals - 1);

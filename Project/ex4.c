@@ -17,12 +17,6 @@ void my_pthread_function(void* arg){
         printf("Thread %d executes sum %d\n", (int) arg + 1, (int) arg + 1);
         aux_sum = aux_sum + ((1./ ((int) arg + 1)));
     }
-    else if((float) total_elems / P == 0){ //if N(total_elems) is divisible by P
-        printf("Thread %d executes sum from %d to %d\n", (int) arg + 1, ((total_elems/P) * (int) arg) + 1, (total_elems/P) * ((int) arg + 1));
-        for(int i = ((total_elems/P) * (int) arg) + 1; i <= (total_elems/P) * ((int) arg + 1); i++){
-            aux_sum = aux_sum + ((1./ i));
-        }
-    }
     else if(total_elems < P){ //the first nth threads execute 1 calculation
         if((int) arg + 1 <= total_elems){
             printf("Thread %d executes sum %d\n", (int) arg + 1, (int) arg + 1);
