@@ -1,10 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <omp.h>
+#include <math.h>
 
 int limit;
 int THREADS;
 omp_lock_t l;  
+
+void retrievePrimes(){
+    bool aux[limit]; //acts as an auxiliar array to the algorithm 
+
+    omp_init_lock(&l);
+	omp_set_num_threads(THREADS);
+    int i;
+
+    #pragma omp parallel for shared(i)
+    for (i = 0; i <= limit; i++){
+        aux[i] = true;
+    }
+
+    int p, j;
+    #pragma omp parallel for shared(p, aux, limit) private(j)
+    for (p = 2; p * p <= limit; p++){
+        if (aux[p]){
+            for (j = pow(p, 2); j <= limit; j = j + p){
+                aux[j] = false;
+            }
+        }
+    }
+
+    omp_destroy_lock(&l);
+
+    printf("Primes until %d: [", limit);
+    for (int i = 2; i <= limit; i++){
+        if (aux[i] == true){
+            printf("%d ", i);
+        }
+    }
+    printf("]\n");
+
+}
 
 int main(int argc, char *argv[]){
 
@@ -18,6 +54,25 @@ int main(int argc, char *argv[]){
         printf("We will calculate the prime numbers up to: %d\n", limit);
         printf("Threads to be used: %d\n", THREADS);
     }
+
+    int primes[limit-1];
+
+    for (int i = 2; i <= limit; i++){
+        primes[i - 2] = i;
+    }
+
+    printf("Initial list: [");
+    for(int j = 0; j < sizeof(primes)/sizeof(int); j++){
+        if(j == sizeof(primes)/sizeof(int) - 1){
+            printf("%d", primes[j]);
+        }
+        else{
+            printf("%d,", primes[j]);
+        }
+    }
+    printf("]\n");
+
+    retrievePrimes();
 
     return 0;
 }

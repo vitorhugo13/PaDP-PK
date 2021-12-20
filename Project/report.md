@@ -44,3 +44,11 @@ Where the x_axis is the number of threads used, and the execution time, in secon
 **Example:** ```./ex4 50``` while P = 5
 
 ![](https://i.imgur.com/kz9QEDX.png)
+
+## Exercise 6
+**Files required:** ```ex6.c```
+
+**Program execution:** ```gcc ex6.c -o ex6``` followed by ```./ex6 <upper limit> <number of threads>```
+
+**Example:** ```./ex6 50 5``` 
+
