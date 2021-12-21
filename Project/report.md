@@ -41,14 +41,16 @@ Where the x_axis is the number of threads used, and the execution time, in secon
 
 **Program execution:** ```gcc ex4.c -o ex4 -lpthread -lm``` followed by ```./ex4 <number of elements of the sum>```
 
-**Example:** ```./ex4 50``` while P = 5
+**Example:** ```./ex4 1000``` while P = 5
 
-![](https://i.imgur.com/kz9QEDX.png)
+![](https://i.imgur.com/FCkdPB7.png)
+
 
 ## Exercise 6
 **Files required:** ```ex6.c```
 
-**Program execution:** ```gcc ex6.c -o ex6``` followed by ```./ex6 <upper limit> <number of threads>```
+**Program execution:** ```gcc ex6.c -o ex6 -lm -fopenmp``` followed by ```./ex6 <upper limit> <number of threads>```
 
-**Example:** ```./ex6 50 5``` 
+**Example:** ```./ex6 100 10``` 
 
+![](https://i.imgur.com/BXi1Eqy.png)

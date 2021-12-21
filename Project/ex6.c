@@ -22,7 +22,7 @@ void retrievePrimes(){
 
     int p, j;
     #pragma omp parallel for shared(p, aux, limit) private(j)
-    for (p = 2; p * p <= limit; p++){
+    for (p = 2; p <= limit; p++){
         if (aux[p]){
             for (j = pow(p, 2); j <= limit; j = j + p){
                 aux[j] = false;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
         sscanf(argv[1],"%d",&limit);
         sscanf(argv[2],"%d",&THREADS);
         printf("We will calculate the prime numbers up to: %d\n", limit);
-        printf("Threads to be used: %d\n", THREADS);
+        printf("Threads to be used: %d\n\n", THREADS);
     }
 
     int primes[limit-1];
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
             printf("%d,", primes[j]);
         }
     }
-    printf("]\n");
+    printf("]\n\n");
 
     retrievePrimes();
 
