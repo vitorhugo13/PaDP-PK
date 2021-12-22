@@ -45,6 +45,17 @@ Where the x_axis is the number of threads used, and the execution time, in secon
 
 ![](https://i.imgur.com/FCkdPB7.png)
 
+## Exercise 5
+**Files required:** ```ex5.c```
+
+**Program execution:** ```gcc ex5.c -o ex5 -fopenmp``` followed by ```./ex5 <number of threads>```
+
+**Example:** ```./ex5 10```
+
+![](https://i.imgur.com/U8qspUw.png)
+
+**Note:** To be able to verify that the program solves systems of equations of other dimensions and with other values, it is necessary to change the value of the variables ```dimension```, ```matrix``` and ```b``` in the ex5.c file.
+
 
 ## Exercise 6
 **Files required:** ```ex6.c```

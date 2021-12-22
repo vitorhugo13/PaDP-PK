@@ -1,24 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
-#include <time.h>
 
 int THREADS;
-int dimension;
-omp_lock_t l;  
 
-//generate random number between 1 and 9
-int generateRandomNumber(int upper, int lower){
-    srand(time(0));
-    int num = (rand() % (upper - lower + 1)) + lower;
-    return num;
-}
+//NOTE: in order to test the programm with a different number of dimensions, the next 3 variables(dimension, matrix, b) should be changed accordingly.
+int dimension = 4;
+int matrix[4][4] = {{9, 0, 0, 0},
+                    {7, 2, 0, 0},
+                    {2, 6, 4, 0},
+                    {5, 4, 3, 2}};
+int b[4] = {200, 400, 333, 1212};
+
+omp_lock_t l;  
 
 //Code based on: https://www.geeksforgeeks.org/determinant-of-a-matrix/
 void getCofactor(int matrix[dimension][dimension], int temp[dimension][dimension], int p, int q, int dimension){
     int i = 0, j = 0;
-    for (int row = 0; row < dimension; row++){
-        for (int col = 0; col < dimension; col++){
+    int row, col;
+
+    for (row = 0; row < dimension; row++){
+        for (col = 0; col < dimension; col++){
             if (row != p && col != q){
                 temp[i][j++] = matrix[row][col];
                 if (j == dimension - 1){
@@ -31,7 +33,8 @@ void getCofactor(int matrix[dimension][dimension], int temp[dimension][dimension
 }
 
 void getAdjoint(int matrix[dimension][dimension], int adjoint[dimension][dimension]){
-    
+    int i, j;
+
     if (dimension == 1){
         adjoint[0][0] = 1;
         return;
@@ -39,8 +42,11 @@ void getAdjoint(int matrix[dimension][dimension], int adjoint[dimension][dimensi
  
     int sign = 1, temp[dimension][dimension];
 
-    for (int i=0; i < dimension; i++){
-        for (int j = 0; j < dimension; j++)
+    #pragma omp parallel for shared(dimension, i, adjoint) private(j)
+    for (i=0; i < dimension; i++){
+        omp_set_lock(&l);
+
+        for (j = 0; j < dimension; j++)
         {
             //Get cofactor of matrix[i][j]
             getCofactor(matrix, temp, i, j, dimension);
@@ -51,13 +57,15 @@ void getAdjoint(int matrix[dimension][dimension], int adjoint[dimension][dimensi
             //Interchanging rows and columns to get the inverse of the cofactor matrix
             adjoint[j][i] = (sign) * (calculateDeterminant(temp, dimension - 1));
         }
+        omp_unset_lock(&l);
     }
 }
 
 //Code based on: https://www.geeksforgeeks.org/determinant-of-a-matrix/
 int calculateDeterminant(int matrix[dimension][dimension], int dimension){
     int determinant = 0;
- 
+    int f;
+
     if (dimension == 1){
         return matrix[0][0];
     }
@@ -65,7 +73,7 @@ int calculateDeterminant(int matrix[dimension][dimension], int dimension){
     int temp[dimension][dimension]; //stores cofactors
     int sign = 1; // store sign multiplier
  
-    for (int f = 0; f < dimension; f++){
+    for (f = 0; f < dimension; f++){
         getCofactor(matrix, temp, 0, f, dimension);
         determinant = determinant + sign * matrix[0][f] * calculateDeterminant(temp, dimension - 1);
         sign = -sign;
@@ -88,22 +96,28 @@ void calculateInverse(int matrix[dimension][dimension], int dimension, double in
     getAdjoint(matrix, adjoint);
 
     //finding inverse
-    for (int i = 0; i < dimension; i++){
-        for (int j = 0; j < dimension; j++){
-        inverse[i][j] = (adjoint[i][j])/(float)determinant;
+    #pragma omp parallel for schedule(static) shared(i, dimension, adjoint, inverse) private(j)
+    for (i = 0; i < dimension; i++){
+        omp_set_lock(&l);
+        for (j = 0; j < dimension; j++){
+            inverse[i][j] = (adjoint[i][j])/(float)determinant;
         }
+        omp_unset_lock(&l);
     }
 }
 
 void findXvalues(double inverse[dimension][dimension], int b[dimension]){
     double results[dimension];
 
+    #pragma omp parallel for schedule(static) shared(results)
     for(int i = 0; i < dimension; i++){
+        omp_set_lock(&l);
         double aux = 0;
         for(int j = 0; j < dimension; j++){
             aux = aux + (inverse[i][j] * b[j]);
         }
         results[i] = aux;
+        omp_unset_lock(&l);
     }
     printf("\n--- solutions ---\n");
     for(int i = 0; i < dimension; i++){
@@ -113,32 +127,12 @@ void findXvalues(double inverse[dimension][dimension], int b[dimension]){
 
 //Reference: https://www.mathsisfun.com/algebra/systems-linear-equations-matrices.html
 void solveEquationSystem(int dimension){
-    int matrix[4][4] = {{2, 0, 0, 0},
-                        {1, 9, 0, 0},
-                        {8, 6, 1, 0},
-                        {5, 4, 1, 6}};
-
-    int b[4] = {102, 239, 200, 500 };
-
-    // for(int i = 0; i < dimension; i++){
-    //     for(int j = 0; j < dimension; j++){
-    //         if(j <= i){
-    //             matrix[i][j] = generateRandomNumber(9,1);
-    //         }
-    //         else{
-    //             matrix[i][j] = 0;
-    //         }
-    //     }
-
-    //     b[i] = generateRandomNumber(100,1);
-    // }
-
     printf("\n---Values matrix---\n");
 
     int row, columns;
     for (row=0; row<dimension; row++)
     {
-        for(columns=0; columns<dimension; columns++)
+        for(columns=0; columns < dimension; columns++)
         {
             printf("%d     ", matrix[row][columns]);
         }
@@ -176,10 +170,10 @@ void displayEquationSystem(int dimension){
 
         for(int j = 0; j < i + 1; j++){
             if(j < i ){
-                printf("a%d%dx%d + ", i+1, j+1, j+1);
+                printf("a(%d,%d)x%d + ", i+1, j+1, j+1);
             }
             else{
-                printf("a%d%dx%d", i+1, j+1, j+1);
+                printf("a(%d,%d)x%d", i+1, j+1, j+1);
             }
         }
 
@@ -190,19 +184,20 @@ void displayEquationSystem(int dimension){
 
 int main(int argc, char *argv[]){
     
-    if(argc != 3){ //one parameter is missing or there are too many parameters
-        printf("To run the program use: ./<file> <number of x_variables(system's dimension)> <number of threads>\n");
+    if(argc != 2){ //one parameter is missing or there are too many parameters
+        printf("To run the program use: ./<file>  <number of threads>\n");
         return -1;
     }
     else{
-        sscanf(argv[1],"%d",&dimension);
-        sscanf(argv[2],"%d",&THREADS);
-        printf("System's dimension: %d\n", dimension);
+        sscanf(argv[1],"%d",&THREADS);
         printf("Threads to be used: %d\n\n", THREADS);
     }
 
+    omp_init_lock(&l);
+	omp_set_num_threads(THREADS);
     displayEquationSystem(dimension);
     solveEquationSystem(dimension);
+    omp_destroy_lock(&l);
 
     return 0;
 }
